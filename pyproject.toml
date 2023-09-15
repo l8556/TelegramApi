@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "telegram"
+version = "1.0"
+description = ""
+authors = ["l02 <l8556@outlook.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+requests = "^2.31.0"
+rich = "^13.5.2"
+host-control = { git = "https://github.com/l8556/host_control.git", branch = "master" }
+
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
