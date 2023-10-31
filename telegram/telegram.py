@@ -6,20 +6,24 @@ from os.path import join, getsize, basename, isdir
 from rich import print
 
 from host_control import File, Dir
+from urllib3 import HTTPSConnectionPool
+from urllib3.exceptions import NewConnectionError
 
 from .Auth import Auth
 
 
 class Telegram:
     __MAX_DOCUMENT_SIZE: int = 50_000_000
-    __MAX_CAPTCHA_LENGTH: int = 200
+    __MAX_CAPTCHA_LENGTH: int = 1000
+    __DEFAULT_PARSE_MOD: str = 'MarkdownV2'
 
     def __init__(self, token: str = None, chat_id: str = None, tmp_dir: str = gettempdir()):
         self.auth = Auth(token=token, chat_id=chat_id)
         self.tmp_dir = tmp_dir
         Dir.create(self.tmp_dir, stdout=False)
 
-    def send_message(self, message: str, out_msg: bool = False) -> None:
+    def send_message(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
+        _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         print(message) if out_msg else ...
 
         if len(message) > 4096:
@@ -29,30 +33,43 @@ class Telegram:
 
         self._request(
             f"https://api.telegram.org/bot{self.auth.token}/sendMessage",
-            data={"chat_id": self.auth.chat_id, "text": message, "parse_mode": "Markdown"},
+            data={
+                "chat_id": self.auth.chat_id,
+                "text": message,
+                "parse_mode": _parse_mod
+            },
             tg_log=False
         )
 
-    def send_document(self, document_path: str, caption: str = '') -> None:
+    def send_document(self, document_path: str, caption: str = '', parse_mode: str = None) -> None:
+        _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         self._request(
             f"https://api.telegram.org/bot{self.auth.token}/sendDocument",
-            data={"chat_id": self.auth.chat_id, "caption": self._prepare_caption(caption), "parse_mode": "Markdown"},
+            data={"chat_id": self.auth.chat_id, "caption": self._prepare_caption(caption), "parse_mode": _parse_mod},
             files={"document": open(self._prepare_documents(document_path), 'rb')}
         )
 
-    def send_media_group(self, document_paths: list, caption: str = None, media_type: str = 'document') -> None:
+    def send_media_group(
+            self,
+            document_paths: list,
+            caption: str = None,
+            media_type: str = 'document',
+            parse_mode: str = None
+    ) -> None:
         """
+        :param parse_mode: HTML, Markdown, MarkdownV2
         :param document_paths:
         :param caption:
         :param media_type: types: 'photo', 'video', 'audio', 'document', 'voice', 'animation'
         :return:
         """
+        _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         files, media = {}, []
 
         if not document_paths:
             return self.send_message(f"No files to send. {caption if caption else ''}", out_msg=True)
 
-        if caption and len(caption) > 200:
+        if caption and len(caption) > self.__MAX_CAPTCHA_LENGTH:
             document_paths.append(self._make_massage_doc(caption, 'caption.txt'))
 
         for doc_path in document_paths:
@@ -60,7 +77,7 @@ class Telegram:
             media.append(dict(type=media_type, media=f'attach://{basename(doc_path)}'))
 
         media[-1]['caption'] = self._prepare_caption(caption) if caption is not None else ''
-        media[-1]['parse_mode'] = "Markdown"
+        media[-1]['parse_mode'] = _parse_mod
 
         self._request(
             f'https://api.telegram.org/bot{self.auth.token}/sendMediaGroup',
@@ -68,14 +85,26 @@ class Telegram:
             files=files
         )
 
+    @staticmethod
+    def escape_special_characters(text: str, special_characters: str) -> str:
+        escaped_string = ""
+
+        for char in text:
+            if char in special_characters:
+                escaped_string += '\\' + char
+            else:
+                escaped_string += char
+
+        return escaped_string
+
     def _request(self, url: str, data: dict, files: dict = None, tg_log: bool = True) -> None:
         if self.auth.token and self.auth.chat_id:
             try:
                 response = post(url, data=data, files=files)
                 if response.status_code != 200:
-                    print(f"Error when sending to telegram: {response.status_code}")
-                    self.send_message(f"Error when sending to telegram: {response.status_code}") if tg_log else ...
-            except Exception as e:
+                    print(f"Error when sending to telegram: {response.json()}")
+                    self.send_message(f"Error when sending to telegram: {response.json()}") if tg_log else ...
+            except (HTTPSConnectionPool, NewConnectionError) as e:
                 print(f"|WARNING| Impossible to send: {data}. Error: {e}")
                 self.send_message(f"|WARNING| Impossible to send: {data}. Error: {e}") if tg_log else ...
 
