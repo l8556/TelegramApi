@@ -15,13 +15,15 @@ from .Auth import Auth
 class Telegram:
     __MAX_DOCUMENT_SIZE: int = 50_000_000
     __MAX_CAPTCHA_LENGTH: int = 1000
+    __DEFAULT_PARSE_MOD: str = 'MarkdownV2'
 
     def __init__(self, token: str = None, chat_id: str = None, tmp_dir: str = gettempdir()):
         self.auth = Auth(token=token, chat_id=chat_id)
         self.tmp_dir = tmp_dir
         Dir.create(self.tmp_dir, stdout=False)
 
-    def send_message(self, message: str, out_msg: bool = False) -> None:
+    def send_message(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
+        _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         print(message) if out_msg else ...
 
         if len(message) > 4096:
@@ -34,25 +36,34 @@ class Telegram:
             data={
                 "chat_id": self.auth.chat_id,
                 "text": message,
-                "parse_mode": "MarkdownV2"
+                "parse_mode": _parse_mod
             },
             tg_log=False
         )
 
-    def send_document(self, document_path: str, caption: str = '') -> None:
+    def send_document(self, document_path: str, caption: str = '', parse_mode: str = None) -> None:
+        _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         self._request(
             f"https://api.telegram.org/bot{self.auth.token}/sendDocument",
-            data={"chat_id": self.auth.chat_id, "caption": self._prepare_caption(caption), "parse_mode": "Markdown"},
+            data={"chat_id": self.auth.chat_id, "caption": self._prepare_caption(caption), "parse_mode": _parse_mod},
             files={"document": open(self._prepare_documents(document_path), 'rb')}
         )
 
-    def send_media_group(self, document_paths: list, caption: str = None, media_type: str = 'document') -> None:
+    def send_media_group(
+            self,
+            document_paths: list,
+            caption: str = None,
+            media_type: str = 'document',
+            parse_mode: str = None
+    ) -> None:
         """
+        :param parse_mode: HTML, Markdown, MarkdownV2
         :param document_paths:
         :param caption:
         :param media_type: types: 'photo', 'video', 'audio', 'document', 'voice', 'animation'
         :return:
         """
+        _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         files, media = {}, []
 
         if not document_paths:
@@ -66,7 +77,7 @@ class Telegram:
             media.append(dict(type=media_type, media=f'attach://{basename(doc_path)}'))
 
         media[-1]['caption'] = self._prepare_caption(caption) if caption is not None else ''
-        media[-1]['parse_mode'] = "Markdown"
+        media[-1]['parse_mode'] = _parse_mod
 
         self._request(
             f'https://api.telegram.org/bot{self.auth.token}/sendMediaGroup',
