@@ -2,7 +2,7 @@
 from os import environ
 from os.path import isfile, join, expanduser
 
-from host_control import File
+from host_tools import File
 
 
 class Auth:

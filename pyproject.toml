@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.7"
 requests = "*"
 rich = "*"
-host-control = { git = "https://github.com/l8556/host_control.git", branch = "master" }
+host-tools = { git = "https://github.com/l8556/host_tools.git", branch = "master" }
 
 
 

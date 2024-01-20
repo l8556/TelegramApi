@@ -5,7 +5,7 @@ from tempfile import gettempdir
 from os.path import join, getsize, basename, isdir
 from rich import print
 
-from host_control import File, Dir
+from host_tools import File, Dir
 from urllib3 import HTTPSConnectionPool
 from urllib3.exceptions import NewConnectionError
 
