@@ -125,7 +125,7 @@ class Telegram:
 
                     if response.status_code == 429:
                         timeout = response.json().get('parameters', {}).get('retry_after', 10) + 1
-                        print(f"time_out: {timeout}")
+                        print(f"Retry after: {timeout}")
                         time.sleep(timeout)
 
                 except (HTTPSConnectionPool, NewConnectionError) as e:
@@ -135,7 +135,6 @@ class Telegram:
 
                 finally:
                     num_tries -= 1
-
 
     def _prepare_documents(self, doc_path: str) -> str:
         if not isdir(doc_path) or getsize(doc_path) <= self.__MAX_DOCUMENT_SIZE:
