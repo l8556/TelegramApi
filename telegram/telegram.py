@@ -11,6 +11,7 @@ from urllib3 import HTTPSConnectionPool
 from urllib3.exceptions import NewConnectionError
 
 from .Auth import Auth
+from .Proxy import Proxy
 
 
 class Telegram:
@@ -18,9 +19,22 @@ class Telegram:
     __MAX_CAPTCHA_LENGTH: int = 1000
     __DEFAULT_PARSE_MOD: str = 'MarkdownV2'
 
-    def __init__(self, token: str = None, chat_id: str = None, tmp_dir: str = gettempdir()):
+    def __init__(
+            self,
+            token: str = None,
+            chat_id: str = None,
+            tmp_dir: str = gettempdir(),
+            proxy: Proxy = None
+    ):
+        """
+        :param token:
+        :param chat_id:
+        :param tmp_dir:
+        :param proxies_param: {login: '', password: '', ip: '', port: ''}
+        """
         self.auth = Auth(token=token, chat_id=chat_id)
         self.tmp_dir = tmp_dir
+        self.proxies: dict = proxy.get_param() if proxy else {}
         Dir.create(self.tmp_dir, stdout=False)
 
     def send_message(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
@@ -102,7 +116,7 @@ class Telegram:
         if self.auth.token and self.auth.chat_id:
             while num_tries > 0:
                 try:
-                    response = post(url, data=data, files=files)
+                    response = post(url, data=data, files=files, proxies=self.proxies)
 
                     if response.status_code == 200:
                         return
