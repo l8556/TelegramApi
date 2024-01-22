@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import time
 from json import dumps
 from requests import post
 from tempfile import gettempdir
@@ -97,16 +98,30 @@ class Telegram:
 
         return escaped_string
 
-    def _request(self, url: str, data: dict, files: dict = None, tg_log: bool = True) -> None:
+    def _request(self, url: str, data: dict, files: dict = None, tg_log: bool = True, num_tries: int = 10) -> None:
         if self.auth.token and self.auth.chat_id:
-            try:
-                response = post(url, data=data, files=files)
-                if response.status_code != 200:
+            while num_tries > 0:
+                try:
+                    response = post(url, data=data, files=files)
+
+                    if response.status_code == 200:
+                        return
+
                     print(f"Error when sending to telegram: {response.json()}")
-                    self.send_message(f"Error when sending to telegram: {response.json()}") if tg_log else ...
-            except (HTTPSConnectionPool, NewConnectionError) as e:
-                print(f"|WARNING| Impossible to send: {data}. Error: {e}")
-                self.send_message(f"|WARNING| Impossible to send: {data}. Error: {e}") if tg_log else ...
+
+                    if response.status_code == 429:
+                        timeout = response.json().get('parameters', {}).get('retry_after', 10) + 1
+                        print(f"time_out: {timeout}")
+                        time.sleep(timeout)
+
+                except (HTTPSConnectionPool, NewConnectionError) as e:
+                    print(f"|WARNING| Impossible to send: {data}. Error: {e}\n timeout: 20 sec")
+                    self.send_message(f"|WARNING| Impossible to send: {data}. Error: {e}") if tg_log else ...
+                    time.sleep(20)
+
+                finally:
+                    num_tries -= 1
+
 
     def _prepare_documents(self, doc_path: str) -> str:
         if not isdir(doc_path) or getsize(doc_path) <= self.__MAX_DOCUMENT_SIZE:
