@@ -26,12 +26,6 @@ class Telegram:
             tmp_dir: str = gettempdir(),
             proxy: Proxy = None
     ):
-        """
-        :param token:
-        :param chat_id:
-        :param tmp_dir:
-        :param proxies_param: {login: '', password: '', ip: '', port: ''}
-        """
         self.auth = Auth(token=token, chat_id=chat_id)
         self.tmp_dir = tmp_dir
         self.proxies: dict = proxy.get_param() if proxy else {}
