@@ -17,7 +17,7 @@ from .Proxy import Proxy, ProxyFile
 class Telegram:
     __MAX_DOCUMENT_SIZE: int = 50_000_000
     __MAX_CAPTCHA_LENGTH: int = 1000
-    __DEFAULT_PARSE_MOD: str = 'MarkdownV2'
+    __DEFAULT_PARSE_MOD: str = 'Markdown'
 
     def __init__(
             self,
