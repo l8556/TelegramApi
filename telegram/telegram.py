@@ -32,7 +32,6 @@ class Telegram:
         self.proxies: dict = self._get_proxies(proxy, proxy_file)
         Dir.create(self.tmp_dir, stdout=False)
 
-
     def send_message(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
         _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         print(message) if out_msg else ...
