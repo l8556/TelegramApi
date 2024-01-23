@@ -32,11 +32,6 @@ class Telegram:
         self.proxies: dict = self._get_proxies(proxy, proxy_file)
         Dir.create(self.tmp_dir, stdout=False)
 
-    @staticmethod
-    def _get_proxies(proxy: Proxy = None, proxy_file: "True | str" = None) -> dict:
-        if isinstance(proxy, Proxy):
-            return proxy.get_param()
-        return ProxyFile(proxy_file).get_config()
 
     def send_message(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
         _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
@@ -152,3 +147,9 @@ class Telegram:
         doc_path = join(self.tmp_dir, name)
         File.write(doc_path, message)
         return doc_path
+
+    @staticmethod
+    def _get_proxies(proxy: Proxy = None, proxy_file: "True | str" = None) -> dict:
+        if isinstance(proxy, Proxy):
+            return proxy.get_param()
+        return ProxyFile(proxy_file).get_config()
