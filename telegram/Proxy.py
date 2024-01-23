@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from os.path import join, expanduser, isfile
 from rich import print
-from host_tools import File
+from host_tools import File, singleton
 
 
 class Proxy:
@@ -15,11 +15,11 @@ class Proxy:
         proxy = f"http://{self.login}:{self.password}@{self.ip}:{self.port}"
         return  {'http': proxy, 'https': proxy}
 
-
+@singleton
 class ProxyFile:
     def __init__(self, path: str = None):
         self._default_proxy_file = join(expanduser('~'), '.telegram', 'proxy.json')
-        self.proxy_file = self._get_proxy_file(path)
+        self._proxy_file = self._get_proxy_file(path)
 
     def _get_proxy_file(self, path: str = None) -> str:
         if isinstance(path, str) and isfile(path):
@@ -29,15 +29,15 @@ class ProxyFile:
         print(f"[red]Proxy configuration file not found")
 
     def get_config(self) -> dict:
-        if isfile(self.proxy_file):
-            config = File.read_json(self.proxy_file)
+        if isfile(self._proxy_file):
+            config = File.read_json(self._proxy_file)
+
             for key in ['login', 'password', 'ip', 'port']:
                 if not config.get(key, None):
+                    print(f"[red]|WARNING| Empty parameter {key} in proxy.json file")
                     return {}
-            return Proxy(
-                login=config['login'],
-                password=config['password'],
-                ip=config['ip'],
-                port=config['port']
-            ).get_param()
+
+            proxy = Proxy(login=config['login'], password=config['password'], ip=config['ip'], port=config['port'])
+            return proxy.get_param()
+
         return {}
