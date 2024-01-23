@@ -11,7 +11,7 @@ from urllib3 import HTTPSConnectionPool
 from urllib3.exceptions import NewConnectionError
 
 from .Auth import Auth
-from .Proxy import Proxy
+from .Proxy import Proxy, ProxyFile
 
 
 class Telegram:
@@ -24,12 +24,21 @@ class Telegram:
             token: str = None,
             chat_id: str = None,
             tmp_dir: str = gettempdir(),
-            proxy: Proxy = None
+            proxy: Proxy = None,
+            proxy_file:  str = None
     ):
         self.auth = Auth(token=token, chat_id=chat_id)
         self.tmp_dir = tmp_dir
-        self.proxies: dict = proxy.get_param() if proxy else {}
+        self.proxies: dict = self._get_proxies(proxy, proxy_file)
         Dir.create(self.tmp_dir, stdout=False)
+
+    @staticmethod
+    def _get_proxies(proxy: Proxy = None, proxy_file: "True | str" = None) -> dict:
+        if isinstance(proxy, Proxy):
+            return proxy.get_param()
+        elif proxy_file:
+            return ProxyFile(proxy_file).get_config()
+        return {}
 
     def send_message(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
         _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
@@ -110,6 +119,7 @@ class Telegram:
         if self.auth.token and self.auth.chat_id:
             while num_tries > 0:
                 try:
+                    print(f"[red]|INFO| The message to Telegram will be sent via proxy") if self.proxies else ...
                     response = post(url, data=data, files=files, proxies=self.proxies)
 
                     if response.status_code == 200:
