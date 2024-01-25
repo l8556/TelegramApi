@@ -25,8 +25,12 @@ class Telegram:
             chat_id: str = None,
             tmp_dir: str = gettempdir(),
             proxy: Proxy = None,
-            proxy_file:  str = None
+            proxy_file:  str = None,
+            max_request_attempts: int = 10,
+            interval: int = 30
     ):
+        self.interval = interval
+        self.max_request_attempts = max_request_attempts
         self.auth = Auth(token=token, chat_id=chat_id)
         self.tmp_dir = tmp_dir
         self.proxies: dict = self._get_proxies(proxy, proxy_file)
@@ -107,9 +111,10 @@ class Telegram:
 
         return escaped_string
 
-    def _request(self, url: str, data: dict, files: dict = None, tg_log: bool = True, num_tries: int = 10) -> None:
+    def _request(self, url: str, data: dict, files: dict = None, tg_log: bool = True) -> None:
+        _max_attempts = self.max_request_attempts
         if self.auth.token and self.auth.chat_id:
-            while num_tries > 0:
+            while _max_attempts > 0:
                 try:
                     print(f"[red]|INFO| The message to Telegram will be sent via proxy") if self.proxies else ...
                     response = post(url, data=data, files=files, proxies=self.proxies)
@@ -127,10 +132,10 @@ class Telegram:
                 except (HTTPSConnectionPool, NewConnectionError) as e:
                     print(f"|WARNING| Impossible to send: {data}. Error: {e}\n timeout: 20 sec")
                     self.send_message(f"|WARNING| Impossible to send: {data}. Error: {e}") if tg_log else ...
-                    time.sleep(20)
+                    time.sleep(self.interval)
 
                 finally:
-                    num_tries -= 1
+                    _max_attempts -= 1
 
     def _prepare_documents(self, doc_path: str) -> str:
         if not isdir(doc_path) or getsize(doc_path) <= self.__MAX_DOCUMENT_SIZE:
