@@ -150,5 +150,5 @@ class Telegram:
     @staticmethod
     def _get_proxies(proxy: Proxy = None, proxy_file: "True | str" = None) -> dict:
         if isinstance(proxy, Proxy):
-            return proxy.get_param()
-        return ProxyFile(proxy_file).get_config()
+            return proxy.configs
+        return ProxyFile(proxy_file).configs
