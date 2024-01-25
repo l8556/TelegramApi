@@ -27,7 +27,7 @@ class Telegram:
             proxy: Proxy = None,
             proxy_file:  str = None,
             max_request_attempts: int = 10,
-            interval: int = 10
+            interval: int = 5
     ):
         self.interval = interval
         self.max_request_attempts = max_request_attempts
