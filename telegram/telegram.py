@@ -27,7 +27,7 @@ class Telegram:
             proxy: Proxy = None,
             proxy_file:  str = None,
             max_request_attempts: int = 10,
-            interval: int = 30
+            interval: int = 10
     ):
         self.interval = interval
         self.max_request_attempts = max_request_attempts
@@ -128,6 +128,8 @@ class Telegram:
                         timeout = response.json().get('parameters', {}).get('retry_after', 10) + 1
                         print(f"Retry after: {timeout}")
                         time.sleep(timeout)
+                    else:
+                        time.sleep(self.interval)
 
                 except (HTTPSConnectionPool, NewConnectionError) as e:
                     print(f"|WARNING| Impossible to send: {data}. Error: {e}\n timeout: 20 sec")
