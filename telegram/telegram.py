@@ -48,7 +48,7 @@ class Telegram:
             return File.delete(document, stdout=False)
 
         message_data = { "chat_id": self.auth.chat_id, "text": message, "parse_mode": _parse_mod }
-        self._request(self._get_url('sendMessage'), data=message_data, tg_log=False)
+        self._request('sendMessage', data=message_data, tg_log=False)
 
     def send_document(self, document_path: str, caption: str = '', parse_mode: str = None) -> None:
         _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
@@ -56,7 +56,7 @@ class Telegram:
         _data = { "chat_id": self.auth.chat_id, "caption": self._prepare_caption(caption), "parse_mode": _parse_mod }
         _file = { "document": open(self._prepare_documents(document_path), 'rb') }
 
-        self._request(self._get_url('sendDocument'), data=_data, files=_file)
+        self._request('sendDocument', data=_data, files=_file)
 
     def send_media_group(
             self,
@@ -90,7 +90,7 @@ class Telegram:
 
         media_group_data = { 'chat_id': self.auth.chat_id, 'media': dumps(media) }
 
-        self._request(self._get_url('sendMediaGroup'), data=media_group_data, files=files)
+        self._request('sendMediaGroup', data=media_group_data, files=files)
 
     @staticmethod
     def escape_special_characters(text: str, special_characters: str) -> str:
@@ -104,13 +104,13 @@ class Telegram:
 
         return escaped_string
 
-    def _request(self, url: str, data: dict, files: dict = None, tg_log: bool = True) -> None:
+    def _request(self, mode: str, data: dict, files: dict = None, tg_log: bool = True) -> None:
         _max_attempts = self.max_request_attempts
         if self.auth.token and self.auth.chat_id:
             while _max_attempts > 0:
                 try:
                     print(f"[red]|INFO| The message to Telegram will be sent via proxy") if self.proxies else ...
-                    response = post(url, data=data, files=files, proxies=self.proxies)
+                    response = post(self._get_url(mode), data=data, files=files, proxies=self.proxies)
 
                     if response.status_code == 200:
                         return
@@ -156,4 +156,3 @@ class Telegram:
 
     def _get_url(self, mode: str) -> str:
         return f"{self.TG_HOST}/bot{self.auth.token}/{mode}"
-
