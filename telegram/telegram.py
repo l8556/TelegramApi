@@ -17,7 +17,9 @@ from .Proxy import Proxy, ProxyFile
 class Telegram:
     __MAX_DOCUMENT_SIZE: int = 50_000_000
     __MAX_CAPTCHA_LENGTH: int = 1000
+    __MAX_MESSAGE_LENGTH: int = 4096
     __DEFAULT_PARSE_MOD: str = 'Markdown'
+    TG_HOST: str = "https://api.telegram.org"
 
     def __init__(
             self,
@@ -40,28 +42,21 @@ class Telegram:
         _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         print(message) if out_msg else ...
 
-        if len(message) > 4096:
+        if len(message) > self.__MAX_MESSAGE_LENGTH:
             document = self._make_massage_doc(message=message)
-            self.send_document(document, caption=self._prepare_caption(message))
+            self.send_document(document, caption=message)
             return File.delete(document, stdout=False)
 
-        self._request(
-            f"https://api.telegram.org/bot{self.auth.token}/sendMessage",
-            data={
-                "chat_id": self.auth.chat_id,
-                "text": message,
-                "parse_mode": _parse_mod
-            },
-            tg_log=False
-        )
+        message_data = { "chat_id": self.auth.chat_id, "text": message, "parse_mode": _parse_mod }
+        self._request(self._get_url('sendMessage'), data=message_data, tg_log=False)
 
     def send_document(self, document_path: str, caption: str = '', parse_mode: str = None) -> None:
         _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
-        self._request(
-            f"https://api.telegram.org/bot{self.auth.token}/sendDocument",
-            data={"chat_id": self.auth.chat_id, "caption": self._prepare_caption(caption), "parse_mode": _parse_mod},
-            files={"document": open(self._prepare_documents(document_path), 'rb')}
-        )
+
+        _data = { "chat_id": self.auth.chat_id, "caption": self._prepare_caption(caption), "parse_mode": _parse_mod }
+        _file = { "document": open(self._prepare_documents(document_path), 'rb') }
+
+        self._request(self._get_url('sendDocument'), data=_data, files=_file)
 
     def send_media_group(
             self,
@@ -93,11 +88,9 @@ class Telegram:
         media[-1]['caption'] = self._prepare_caption(caption) if caption is not None else ''
         media[-1]['parse_mode'] = _parse_mod
 
-        self._request(
-            f'https://api.telegram.org/bot{self.auth.token}/sendMediaGroup',
-            data={'chat_id': self.auth.chat_id, 'media': dumps(media)},
-            files=files
-        )
+        media_group_data = { 'chat_id': self.auth.chat_id, 'media': dumps(media) }
+
+        self._request(self._get_url('sendMediaGroup'), data=media_group_data, files=files)
 
     @staticmethod
     def escape_special_characters(text: str, special_characters: str) -> str:
@@ -142,6 +135,7 @@ class Telegram:
     def _prepare_documents(self, doc_path: str) -> str:
         if not isdir(doc_path) or getsize(doc_path) <= self.__MAX_DOCUMENT_SIZE:
             return doc_path
+
         archive_path = join(self.tmp_dir, f'{basename(doc_path)}.zip')
         File.compress(doc_path, archive_path)
         return archive_path
@@ -159,3 +153,7 @@ class Telegram:
         if isinstance(proxy, Proxy):
             return proxy.configs
         return ProxyFile(proxy_file).get_configs()
+
+    def _get_url(self, mode: str) -> str:
+        return f"{self.TG_HOST}/bot{self.auth.token}/{mode}"
+
