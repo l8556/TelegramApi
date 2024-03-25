@@ -2,14 +2,13 @@
 import time
 from json import dumps
 
-from host_tools.utils import Str
 from requests import post
 from tempfile import gettempdir
-from os.path import join, getsize, basename, isdir, dirname, realpath
+from os.path import join, getsize, basename, isdir
 from rich import print
 from .config import Config
 
-from host_tools import File, Dir
+from host_tools import File, Dir, Str
 from urllib3 import HTTPSConnectionPool
 from urllib3.exceptions import NewConnectionError
 
