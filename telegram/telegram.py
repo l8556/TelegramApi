@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 import time
 from json import dumps
+
+from host_tools.utils import Str
 from requests import post
 from tempfile import gettempdir
-from os.path import join, getsize, basename, isdir
+from os.path import join, getsize, basename, isdir, dirname, realpath
 from rich import print
+from .config import Config
 
 from host_tools import File, Dir
 from urllib3 import HTTPSConnectionPool
@@ -15,11 +18,11 @@ from .Proxy import Proxy, ProxyFile
 
 
 class Telegram:
-    __MAX_DOCUMENT_SIZE: int = 50_000_000
-    __MAX_CAPTCHA_LENGTH: int = 1000
-    __MAX_MESSAGE_LENGTH: int = 4096
-    __DEFAULT_PARSE_MOD: str = 'Markdown'
-    TG_HOST: str = "https://api.telegram.org"
+    __MAX_DOCUMENT_SIZE: int = Config.MAX_DOCUMENT_SIZE
+    __MAX_CAPTCHA_LENGTH: int = Config.MAX_CAPTCHA_LENGTH
+    __MAX_MESSAGE_LENGTH: int = Config.MAX_MESSAGE_LENGTH
+    __DEFAULT_PARSE_MOD: str = Config.DEFAULT_PARSE_MOD
+    TG_HOST: str = Str.delete_last_slash(Config.API_HOST)
 
     def __init__(
             self,

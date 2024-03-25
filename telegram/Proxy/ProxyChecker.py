@@ -2,6 +2,8 @@
 from requests import post
 from requests.exceptions import RequestException
 
+from ..config import Config
+
 
 class ProxyChecker:
     _checked_proxies = {}
@@ -14,7 +16,7 @@ class ProxyChecker:
             return ProxyChecker._checked_proxies[proxy_key]
 
         try:
-            post('https://api.telegram.org/', proxies=proxies)
+            post(Config.API_HOST, proxies=proxies)
             result = True
         except RequestException:
             result = False
