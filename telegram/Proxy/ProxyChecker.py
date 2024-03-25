@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from host_tools.utils import Str
 from requests import post
 from requests.exceptions import RequestException
 
@@ -16,7 +17,7 @@ class ProxyChecker:
             return ProxyChecker._checked_proxies[proxy_key]
 
         try:
-            post(Config.API_HOST, proxies=proxies)
+            post(f"{Str.delete_last_slash(Config.API_HOST)}/", proxies=proxies)
             result = True
         except RequestException:
             result = False
