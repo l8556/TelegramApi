@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+from functools import wraps
 from json import dumps
 
 from requests import post
@@ -14,6 +15,16 @@ from urllib3.exceptions import NewConnectionError
 
 from .Auth import Auth
 from .Proxy import Proxy, ProxyFile
+
+def with_token_only(func):
+    @wraps(func)
+    def _check(self, *args, **kwargs):
+        if self.auth.token and self.auth.chat_id:
+            return func(self, *args, **kwargs)
+        print('pls check token')
+
+
+    return _check
 
 
 class Telegram:
@@ -75,7 +86,6 @@ class Telegram:
         :return:
         """
         _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
-        files, media = {}, []
 
         if not document_paths:
             return self.send_message(f"No files to send. {caption if caption else ''}", out_msg=True)
@@ -83,16 +93,23 @@ class Telegram:
         if caption and len(caption) > self.__MAX_CAPTCHA_LENGTH:
             document_paths.append(self._make_massage_doc(caption, 'caption.txt'))
 
-        for doc_path in document_paths:
-            files[basename(doc_path)] = open(self._prepare_documents(doc_path), 'rb')
-            media.append(dict(type=media_type, media=f'attach://{basename(doc_path)}'))
+        _max_attempts = self.max_request_attempts
 
-        media[-1]['caption'] = self._prepare_caption(caption) if caption is not None else ''
-        media[-1]['parse_mode'] = _parse_mod
+        while _max_attempts > 0:
+            files, media = {}, []
+            for doc_path in document_paths:
+                files[basename(doc_path)] = open(self._prepare_documents(doc_path), 'rb')
+                media.append(dict(type=media_type, media=f'attach://{basename(doc_path)}'))
 
-        media_group_data = { 'chat_id': self.auth.chat_id, 'media': dumps(media) }
+            media[-1]['caption'] = self._prepare_caption(caption) if caption is not None else ''
+            media[-1]['parse_mode'] = _parse_mod
 
-        self._request('sendMediaGroup', data=media_group_data, files=files)
+            media_group_data = { 'chat_id': self.auth.chat_id, 'media': dumps(media) }
+
+            if self._request('sendMediaGroup', data=media_group_data, files=files):
+                break
+
+            _max_attempts -= 1
 
     @staticmethod
     def escape_special_characters(text: str, special_characters: str) -> str:
@@ -106,33 +123,37 @@ class Telegram:
 
         return escaped_string
 
-    def _request(self, mode: str, data: dict, files: dict = None, tg_log: bool = True) -> None:
+    @with_token_only
+    def _request(self, mode: str, data: dict, files: dict = None, tg_log: bool = True) -> bool:
         _max_attempts = self.max_request_attempts
-        if self.auth.token and self.auth.chat_id:
-            while _max_attempts > 0:
-                try:
-                    print(f"[red]|INFO| The message to Telegram will be sent via proxy") if self.proxies else ...
-                    response = post(self._get_url(mode), data=data, files=files, proxies=self.proxies)
+        while _max_attempts > 0:
+            try:
+                print(f"[red]|INFO| The message to Telegram will be sent via proxy") if self.proxies else ...
+                response = post(self._get_url(mode), data=data, files=files, proxies=self.proxies)
 
-                    if response.status_code == 200:
-                        return
+                if response.status_code == 200:
+                    return True
 
-                    print(f"Error when sending to telegram: {response.json()}")
+                print(f"Error when sending to telegram: {response.json()}")
 
-                    if response.status_code == 429:
-                        timeout = response.json().get('parameters', {}).get('retry_after', 10) + 1
-                        print(f"Retry after: {timeout}")
-                        time.sleep(timeout)
-                    else:
-                        time.sleep(self.interval)
+                if response.status_code == 429:
+                    timeout = response.json().get('parameters', {}).get('retry_after', 10) + 2
+                    print(f"Retry after: {timeout}")
+                    time.sleep(timeout)
 
-                except (HTTPSConnectionPool, NewConnectionError) as e:
-                    print(f"|WARNING| Impossible to send: {data}. Error: {e}\n timeout: 20 sec")
-                    self.send_message(f"|WARNING| Impossible to send: {data}. Error: {e}") if tg_log else ...
+                elif response.status_code == 400:
+                    if response.json().get('description') == 'Bad Request: file must be non-empty':
+                        return False
+                else:
                     time.sleep(self.interval)
 
-                finally:
-                    _max_attempts -= 1
+            except (HTTPSConnectionPool, NewConnectionError) as e:
+                print(f"|WARNING| Impossible to send: {data}. Error: {e}\n timeout: 20 sec")
+                self.send_message(f"|WARNING| Impossible to send: {data}. Error: {e}") if tg_log else ...
+                time.sleep(self.interval)
+
+            finally:
+                _max_attempts -= 1
 
     def _prepare_documents(self, doc_path: str) -> str:
         if not isdir(doc_path) or getsize(doc_path) <= self.__MAX_DOCUMENT_SIZE:
