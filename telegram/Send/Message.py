@@ -15,7 +15,7 @@ class Message(Send):
         super().__init__(requests=requests)
         self.document = Document(self.requests)
 
-    def send(self, message: str, out_msg: bool = False, parse_mode: str = None):
+    def send(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
         _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
         print(message) if out_msg else ...
 

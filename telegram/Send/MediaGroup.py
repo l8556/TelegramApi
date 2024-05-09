@@ -19,7 +19,7 @@ class MediaGroup(Send):
         media_type: str = 'document',
         parse_mode: str = None,
         max_request_attempts: int = 10
-    ):
+    ) -> None:
         """
         :param max_request_attempts:
         :param parse_mode: HTML, Markdown, MarkdownV2
