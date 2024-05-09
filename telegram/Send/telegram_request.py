@@ -31,13 +31,15 @@ def with_chat_id_only(func):
     return _check
 
 class TelegramRequests:
-    def __init__(self,
-        token: str = None,
-        chat_id: str = None,
-        proxy: Proxy = None,
-        proxy_file: str = None,
-        max_request_attempts: int = 10,
-        interval: int = 5
+
+    def __init__(
+            self,
+            token: str = None,
+            chat_id: str = None,
+            proxy: Proxy = None,
+            proxy_file: str = None,
+            max_request_attempts: int = 10,
+            interval: int = 5
         ):
         self.auth = Auth(token=token, chat_id=chat_id)
         self.interval = interval
@@ -63,8 +65,9 @@ class TelegramRequests:
                     timeout = response.json().get('parameters', {}).get('retry_after', 10) + 2
                     print(f"Retry after: {timeout}")
                     time.sleep(timeout)
+                    return False
 
-                elif response.status_code == 400:
+                if response.status_code == 400:
                     if response.json().get('description') == 'Bad Request: file must be non-empty':
                         return False
                 else:

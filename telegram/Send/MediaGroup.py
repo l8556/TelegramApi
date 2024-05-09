@@ -32,17 +32,21 @@ class MediaGroup(Send):
             document_paths.append(self.message.make_doc(caption, 'caption.txt'))
 
         while max_request_attempts > 0:
-            files, media = {}, []
-            for doc_path in document_paths:
-                files[basename(doc_path)] = open(self.document.prepare(doc_path), 'rb')
-                media.append(dict(type=media_type, media=f'attach://{basename(doc_path)}'))
+            files, data = self._get_data(document_paths, media_type, caption, parse_mode or self._DEFAULT_PARSE_MOD)
 
-            media[-1]['caption'] = self.caption.prepare(caption) if caption is not None else ''
-            media[-1]['parse_mode'] = parse_mode or self._DEFAULT_PARSE_MOD
-
-            media_group_data = {'chat_id': self.requests.auth.chat_id, 'media': dumps(media)}
-
-            if self.requests.post('sendMediaGroup', data=media_group_data, files=files):
+            if self.requests.post('sendMediaGroup', data=data, files=files):
                 break
 
             max_request_attempts -= 1
+
+    def _get_data(self, document_paths: list, media_type: str, caption: str, parse_mode: str) -> tuple[dict, dict]:
+        files, media = {}, []
+
+        for doc_path in document_paths:
+            files[basename(doc_path)] = open(self.document.prepare(doc_path), 'rb')
+            media.append(dict(type=media_type, media=f'attach://{basename(doc_path)}'))
+
+        media[-1]['caption'] = self.caption.prepare(caption) if caption is not None else ''
+        media[-1]['parse_mode'] = parse_mode
+
+        return files, {'chat_id': self.requests.auth.chat_id, 'media': dumps(media)},
