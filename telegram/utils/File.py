@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from os.path import join, isdir
 
 from telegram.utils import Str
 
@@ -19,16 +20,19 @@ class File:
         :param archive_path: Path to the archive file.
         :param delete:  Deleting files after compression.
         """
-        _name = os.path.basename(Str.delete_last_slash(path))
-        _archive_path = archive_path or join(os.path.dirname(path) if os.path.isfile(path) else path, f"{_name}.zip")
-
         if not os.path.exists(path):
             return print(f'[bold red]|COMPRESS WARNING| Path for compression does not exist: {path}')
+
+        _archive_path = archive_path or join(
+            os.path.dirname(path) if os.path.isfile(path) else path,
+            f"{os.path.basename(Str.delete_last_slash(path))}.zip"
+        )
 
         os.makedirs(os.path.dirname(_archive_path), exist_ok=True)
 
         with ZipFile(_archive_path, 'w') as _zip:
             if os.path.isdir(path):
+                print(f'[green]|INFO| Compressing dir: {path}')
                 exceptions = File.EXCEPTIONS + [f"{os.path.basename(_archive_path)}"]
 
                 for file in File.get_paths(path):
@@ -36,18 +40,12 @@ class File:
                         _zip.write(file, os.path.relpath(file, path), compress_type=compress_type)
 
                 if delete:
-                    _archive_name = os.path.basename(_archive_path)
-                    File.delete([join(path, obj) for obj in os.listdir(path) if obj != _archive_name], stdout=False)
+                    File.delete([join(path, obj) for obj in os.listdir(path) if obj != os.path.basename(_archive_path)])
 
             else:
                 print(f'[green]|INFO| Compressing file: {path}')
-                _zip.write(path, _name, compress_type=compress_type)
-                File.delete(path, stdout=False) if delete else ...
-
-        if os.path.exists(_archive_path) and os.path.getsize(_archive_path) != 0:
-            return print(f"[green]|INFO| Success compressed: {_archive_path}")
-
-        print(f"[WARNING] Archive not exists: {_archive_path}")
+                _zip.write(path, os.path.basename(Str.delete_last_slash(path)), compress_type=compress_type)
+                File.delete(path) if delete else ...
 
     @staticmethod
     def delete(path: "str | tuple | list", stdout: bool = False, stderr: bool = False) -> None:
