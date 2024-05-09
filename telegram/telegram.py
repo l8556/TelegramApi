@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
-from json import dumps
 from tempfile import gettempdir
-from os.path import basename
-from rich import print
-from .config import Config
-
-from host_tools import File
 
 from .Proxy import Proxy
 from .Send import TelegramRequests, Message, MediaGroup, Document
