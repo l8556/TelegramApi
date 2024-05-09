@@ -2,7 +2,7 @@
 from abc import abstractmethod
 
 from telegram.config import Config
-from telegram.libs.telegram_request import TelegramRequests
+from .telegram_request import TelegramRequests
 
 class Send:
     __MAX_CAPTCHA_LENGTH: int = Config.MAX_CAPTCHA_LENGTH

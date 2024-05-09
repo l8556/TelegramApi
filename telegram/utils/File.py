@@ -4,7 +4,6 @@ import Str
 
 from shutil import rmtree
 from zipfile import ZipFile
-from itertools import chain
 
 
 
