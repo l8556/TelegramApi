@@ -18,5 +18,6 @@ class Proxy:
 
         if ProxyChecker.check(proxies):
             return proxies
+
         print(f"[red]|ERROR| Unable to access the proxy server. Check configs.")
         return {}
