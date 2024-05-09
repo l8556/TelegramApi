@@ -23,5 +23,4 @@ class ProxyChecker:
             result = False
 
         ProxyChecker._checked_proxies[proxy_key] = result
-
         return result
