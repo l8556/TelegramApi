@@ -4,7 +4,7 @@ import requests
 
 from functools import wraps
 
-from host_tools.utils import Str
+from ..utils import Str
 from urllib3 import HTTPSConnectionPool
 from urllib3.exceptions import NewConnectionError
 
