@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-import Str
+
+from telegram.utils import Str
 
 from shutil import rmtree
 from zipfile import ZipFile
@@ -19,7 +20,7 @@ class File:
         :param delete:  Deleting files after compression.
         """
         _name = os.path.basename(Str.delete_last_slash(path))
-        _archive_path = archive_path or join(os.path.dirname(path) if isfile(path) else path, f"{_name}.zip")
+        _archive_path = archive_path or join(os.path.dirname(path) if os.path.isfile(path) else path, f"{_name}.zip")
 
         if not os.path.exists(path):
             return print(f'[bold red]|COMPRESS WARNING| Path for compression does not exist: {path}')

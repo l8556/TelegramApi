@@ -16,7 +16,7 @@ class Message(Send):
         self.document = Document(self.requests)
 
     def send(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
-        _parse_mod = parse_mode if parse_mode else self.__DEFAULT_PARSE_MOD
+        _parse_mod = parse_mode if parse_mode else self._DEFAULT_PARSE_MOD
         print(message) if out_msg else ...
 
         if len(message) > self.__MAX_MESSAGE_LENGTH:
