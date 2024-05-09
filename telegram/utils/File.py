@@ -65,8 +65,8 @@ class File:
 
             if stderr and os.path.exists(object_path):
                 print(f"[bold red]|DELETE WARNING| Is not deleted: {_path}")
-            else:
-                print(f'[green]|INFO| Deleted: {_path}') if stdout else ...
+            elif stdout:
+                print(f'[green]|INFO| Deleted: {_path}')
 
     @staticmethod
     def get_paths(dir_path: str) -> list:
