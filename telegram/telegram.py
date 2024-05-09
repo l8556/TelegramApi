@@ -34,10 +34,12 @@ class Telegram:
             parse_mode: str = None
     ) -> None:
         """
+        :param max_request_attempts:
         :param parse_mode: HTML, Markdown, MarkdownV2
         :param document_paths:
         :param caption:
         :param media_type: types: 'photo', 'video', 'audio', 'document', 'voice', 'animation'
         :return:
         """
+
         MediaGroup(self.requests).send(document_paths, caption, media_type, parse_mode)

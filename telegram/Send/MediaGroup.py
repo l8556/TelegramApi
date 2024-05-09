@@ -20,15 +20,6 @@ class MediaGroup(Send):
         parse_mode: str = None,
         max_request_attempts: int = 10
     ) -> None:
-        """
-        :param max_request_attempts:
-        :param parse_mode: HTML, Markdown, MarkdownV2
-        :param document_paths:
-        :param caption:
-        :param media_type: types: 'photo', 'video', 'audio', 'document', 'voice', 'animation'
-        :return:
-        """
-
         if not document_paths:
             return self.message.send(f"No files to send. {caption if caption else ''}", out_msg=True)
 
