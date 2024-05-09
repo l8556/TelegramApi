@@ -19,13 +19,13 @@ class Message(Send):
         _parse_mod = parse_mode if parse_mode else self._DEFAULT_PARSE_MOD
         print(message) if out_msg else ...
 
-        if len(message) > self.__MAX_MESSAGE_LENGTH:
+        if len(message) > self._MAX_MESSAGE_LENGTH:
             document_path = self.make_doc(message=message)
             self.document.send(document_path, caption=message)
             return File.delete(document_path)
 
         message_data = {"chat_id": self.requests.auth.chat_id, "text": message, "parse_mode": _parse_mod}
-        self.requests.post('sendMessage', data=message_data, tg_log=False)
+        self.requests.post('sendMessage', data=message_data)
 
     @staticmethod
     def make_doc(message: str, name: str = 'message.txt', tmp_dir: str = gettempdir()) -> str:
