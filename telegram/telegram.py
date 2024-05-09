@@ -17,8 +17,8 @@ class Telegram:
             max_request_attempts: int = 10,
             interval: int = 5
     ):
-        self.requests = TelegramRequests(token, chat_id, proxy, proxy_file, max_request_attempts, interval)
         self.tmp_dir = tmp_dir
+        self.requests = TelegramRequests(token, chat_id, proxy, proxy_file, max_request_attempts, interval)
 
     def send_message(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
         Message(self.requests).send(message, out_msg, parse_mode)
