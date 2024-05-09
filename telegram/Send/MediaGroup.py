@@ -30,15 +30,16 @@ class MediaGroup(Send):
             return self.message.send(f"No files to send. {caption if caption else ''}", out_msg=True)
 
         if caption and len(caption) > self._MAX_CAPTCHA_LENGTH:
-            document_paths.append(self.message.make_doc(caption, 'caption.txt'))
+            document_paths.append(self.message.make_doc(caption, 'full_caption.txt'))
 
-        while max_request_attempts > 0:
-            files, data = self._get_data(document_paths, media_type, caption, parse_mode or self._DEFAULT_PARSE_MOD)
+        for chung in self._get_group_chunks(document_paths):
+            while max_request_attempts > 0:
+                files, data = self._get_data(chung, media_type, caption, parse_mode or self._DEFAULT_PARSE_MOD)
 
-            if self.requests.post('sendMediaGroup', data=data, files=files):
-                break
+                if self.requests.post('sendMediaGroup', data=data, files=files):
+                    break
 
-            max_request_attempts -= 1
+                max_request_attempts -= 1
 
     def _get_data(self, document_paths: list, media_type: str, caption: str, parse_mode: str) -> tuple[dict, dict]:
         files, media = {}, []
@@ -51,3 +52,7 @@ class MediaGroup(Send):
         media[-1]['parse_mode'] = parse_mode
 
         return files, {'chat_id': self.requests.auth.chat_id, 'media': dumps(media)}
+
+    def _get_group_chunks(self, document_paths: list) -> list:
+        length = self._MAX_MEDIA_GROUP_LENGTH
+        return [document_paths[i:i + length] for i in range(0, len(document_paths), length)]

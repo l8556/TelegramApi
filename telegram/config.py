@@ -8,3 +8,4 @@ class Config:
     MAX_CAPTCHA_LENGTH: int = 1000
     MAX_MESSAGE_LENGTH: int = 4096
     DEFAULT_PARSE_MOD: str = 'Markdown'
+    MAX_MEDIA_GROUP_LENGTH: int = 10

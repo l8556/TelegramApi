@@ -9,6 +9,7 @@ class Send(ABC):
     _MAX_MESSAGE_LENGTH: int = Config.MAX_MESSAGE_LENGTH
     _DEFAULT_PARSE_MOD: str = Config.DEFAULT_PARSE_MOD
     _MAX_DOCUMENT_SIZE: int = Config.MAX_DOCUMENT_SIZE
+    _MAX_MEDIA_GROUP_LENGTH: int = Config.MAX_MEDIA_GROUP_LENGTH
 
     def __init__(self, requests: TelegramRequests):
         self.requests = requests
