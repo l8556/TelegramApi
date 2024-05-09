@@ -25,6 +25,7 @@ class MediaGroup(Send):
         parse_mode: str = None,
         max_request_attempts: int = 10
     ) -> None:
+
         if not document_paths:
             return self.message.send(f"No files to send. {caption if caption else ''}", out_msg=True)
 
@@ -49,4 +50,4 @@ class MediaGroup(Send):
         media[-1]['caption'] = self.caption.prepare(caption) if caption is not None else ''
         media[-1]['parse_mode'] = parse_mode
 
-        return files, {'chat_id': self.requests.auth.chat_id, 'media': dumps(media)},
+        return files, {'chat_id': self.requests.auth.chat_id, 'media': dumps(media)}
