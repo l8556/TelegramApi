@@ -14,9 +14,10 @@ class Message(Send):
     _DEFAULT_PARSE_MOD: str = Config.DEFAULT_PARSE_MOD
     _MAX_MESSAGE_LENGTH: int = Config.MAX_MESSAGE_LENGTH
 
-    def __init__(self, requests: TelegramRequests):
+    def __init__(self, requests: TelegramRequests, tmp_dir: str = gettempdir()):
         self.requests = requests
         self.document = Document(self.requests)
+        self.tmp_dir = tmp_dir
 
     def send(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
         print(message) if out_msg else ...
@@ -36,8 +37,8 @@ class Message(Send):
         )
 
     @staticmethod
-    def make_doc(message: str, name: str = 'message.txt', tmp_dir: str = gettempdir()) -> str:
-        doc_path = os.path.join(tmp_dir, name)
+    def make_doc(message: str, name: str = 'message.txt') -> str:
+        doc_path = os.path.join(self.tmp_dir, name)
 
         with open(doc_path, 'w') as file:
             file.write(message)

@@ -21,11 +21,11 @@ class Telegram:
         self.requests = TelegramRequests(token, chat_id, proxy, proxy_file, max_request_attempts, interval)
 
     def send_message(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
-        Message(self.requests).send(message, out_msg, parse_mode)
+        Message(self.requests, self.tmp_dir).send(message=message, out_msg=out_msg, parse_mode=parse_mode)
 
 
     def send_document(self, document_path: str, caption: str = '', parse_mode: str = None) -> None:
-        Document(self.requests).send(document_path, caption, parse_mode)
+        Document(self.requests, self.tmp_dir).send(document_path, caption, parse_mode)
 
     def send_media_group(self,
             document_paths: list,

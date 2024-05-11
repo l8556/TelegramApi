@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
 import requests
+from rich import print
 
 from functools import wraps
 from urllib3 import HTTPSConnectionPool
@@ -31,6 +32,7 @@ def with_chat_id_only(func):
     return _check
 
 class TelegramRequests:
+    _API_HOST = Config.API_HOST
 
     def __init__(
             self,
@@ -44,7 +46,7 @@ class TelegramRequests:
         self.auth = Auth(token=token, chat_id=chat_id)
         self.interval = interval
         self.max_request_attempts = max_request_attempts
-        self.tg_host = Str.delete_last_slash(Config.API_HOST)
+        self.tg_host = Str.delete_last_slash(self._API_HOST)
         self.proxies: dict = self._get_proxies(proxy, proxy_file)
 
     @with_chat_id_only
