@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from telegram.config import Config
+from ...config import Config
 
 
 class Caption:

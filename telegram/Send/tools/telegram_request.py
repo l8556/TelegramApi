@@ -7,10 +7,10 @@ from functools import wraps
 from urllib3 import HTTPSConnectionPool
 from urllib3.exceptions import NewConnectionError
 
-from telegram.utils import Str
-from telegram.Proxy import Proxy, ProxyFile
-from telegram.Auth import Auth
-from telegram.config import Config
+from ...utils import Str
+from ...Proxy import Proxy, ProxyFile
+from ...Auth import Auth
+from ...config import Config
 
 
 def with_token_only(func):

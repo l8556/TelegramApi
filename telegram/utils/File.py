@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
+import json
 from os.path import join, isdir
+from io import open as io_open
+from codecs import open as codecs_open
 
 from telegram.utils import Str
 
@@ -71,3 +74,13 @@ class File:
     @staticmethod
     def get_paths(dir_path: str) -> list:
         return [os.path.join(root, filename) for root, _, files in os.walk(dir_path) for filename in files]
+
+    @staticmethod
+    def read_json(path_to_json: str, encoding: str = "utf_8_sig") -> json:
+        with codecs_open(path_to_json, mode="r", encoding=encoding) as file:
+            return json.load(file)
+
+    @staticmethod
+    def read(file_path: str, encoding='utf-8') -> str:
+        with io_open(file_path, 'r', encoding=encoding) as file:
+            return file.read()
