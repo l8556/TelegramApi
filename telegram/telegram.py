@@ -31,7 +31,9 @@ class Telegram:
             document_paths: list,
             caption: str = None,
             media_type: str = 'document',
-            parse_mode: str = None
+            parse_mode: str = None,
+            max_request_attempts: int = 10
+
     ) -> None:
         """
         :param max_request_attempts:
@@ -41,5 +43,10 @@ class Telegram:
         :param media_type: types: 'photo', 'video', 'audio', 'document', 'voice', 'animation'
         :return:
         """
-
-        MediaGroup(self.requests).send(document_paths, caption, media_type, parse_mode)
+        MediaGroup(self.requests).send(
+            document_paths=document_paths,
+            caption=caption,
+            media_type=media_type,
+            parse_mode=parse_mode,
+            max_request_attempts=max_request_attempts
+        )
