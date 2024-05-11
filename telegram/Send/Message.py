@@ -2,21 +2,23 @@
 import os
 from tempfile import gettempdir
 
+from ..config import Config
 from ..utils import File
 
 from .Document import Document
 from .Send import Send
-from .telegram_request import TelegramRequests
+from .tools import TelegramRequests
 
 
 class Message(Send):
+    _DEFAULT_PARSE_MOD: str = Config.DEFAULT_PARSE_MOD
+    _MAX_MESSAGE_LENGTH: int = Config.MAX_MESSAGE_LENGTH
 
     def __init__(self, requests: TelegramRequests):
-        super().__init__(requests=requests)
+        self.requests = requests
         self.document = Document(self.requests)
 
     def send(self, message: str, out_msg: bool = False, parse_mode: str = None) -> None:
-        _parse_mod = parse_mode if parse_mode else self._DEFAULT_PARSE_MOD
         print(message) if out_msg else ...
 
         if len(message) > self._MAX_MESSAGE_LENGTH:
@@ -24,8 +26,14 @@ class Message(Send):
             self.document.send(document_path, caption=message)
             return File.delete(document_path)
 
-        message_data = {"chat_id": self.requests.auth.chat_id, "text": message, "parse_mode": _parse_mod}
-        self.requests.post('sendMessage', data=message_data)
+        self.requests.post(
+            mode='sendMessage',
+            data={
+                "chat_id": self.requests.auth.chat_id,
+                "text": message,
+                "parse_mode": parse_mode or self._DEFAULT_PARSE_MOD
+            }
+        )
 
     @staticmethod
     def make_doc(message: str, name: str = 'message.txt', tmp_dir: str = gettempdir()) -> str:

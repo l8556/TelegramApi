@@ -3,16 +3,19 @@ from os.path import basename
 from json import dumps
 
 from .Document import Document
-from .Caption import Caption
 from .Message import Message
 from .Send import Send
-from .telegram_request import TelegramRequests
+from .tools import TelegramRequests, Caption
+from ..config import Config
 
 
 class MediaGroup(Send):
+    _DEFAULT_PARSE_MOD: str = Config.DEFAULT_PARSE_MOD
+    _MAX_CAPTCHA_LENGTH: int = Config.MAX_CAPTCHA_LENGTH
+    _MAX_LENGTH: int = Config.MAX_MEDIA_GROUP_LENGTH
 
     def __init__(self, requests: TelegramRequests):
-        super().__init__(requests=requests)
+        self.requests = requests
         self.message = Message(self.requests)
         self.document = Document(self.requests)
         self.caption = Caption()
@@ -54,5 +57,4 @@ class MediaGroup(Send):
         return files, {'chat_id': self.requests.auth.chat_id, 'media': dumps(media)}
 
     def _get_group_chunks(self, document_paths: list) -> list:
-        length = self._MAX_MEDIA_GROUP_LENGTH
-        return [document_paths[i:i + length] for i in range(0, len(document_paths), length)]
+        return [document_paths[i:i + self._MAX_LENGTH] for i in range(0, len(document_paths), self._MAX_LENGTH)]

@@ -2,16 +2,18 @@
 import os
 from tempfile import gettempdir
 
-from .Caption import Caption
 from .Send import Send
-from .telegram_request import TelegramRequests
+from .tools import TelegramRequests, Caption
+from ..config import Config
 from ..utils import File
 
 
 class Document(Send):
+    _DEFAULT_PARSE_MOD: str = Config.DEFAULT_PARSE_MOD
+    _MAX_DOCUMENT_SIZE: int = Config.MAX_DOCUMENT_SIZE
 
     def __init__(self, requests: TelegramRequests):
-        super().__init__(requests=requests)
+        self.requests = requests
         self.caption = Caption()
 
     def send(self, document_path: str, caption: str = '', parse_mode: str = None) -> None:
