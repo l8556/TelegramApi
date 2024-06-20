@@ -9,8 +9,6 @@ readme = "README.md"
 python = "^3.7"
 requests = "*"
 rich = "*"
-host-tools = { git = "https://github.com/l8556/host_tools.git", branch = "master" }
-
 
 
 [build-system]

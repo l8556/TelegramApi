@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from host_tools.utils import Str
 from requests import post
 from requests.exceptions import RequestException
 
+from ..utils import Str
 from ..config import Config
 
 
@@ -23,5 +23,4 @@ class ProxyChecker:
             result = False
 
         ProxyChecker._checked_proxies[proxy_key] = result
-
         return result

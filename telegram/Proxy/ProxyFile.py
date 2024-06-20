@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from rich import print
 from os.path import join, expanduser, isfile
-from host_tools import File
 from typing import Optional
 
 from .Proxy import Proxy
+from ..utils import File
 
 
 class ProxyFile:
