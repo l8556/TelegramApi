@@ -34,7 +34,7 @@ telegram.send_media_group(document_paths, caption="Check out these photos!", med
 
 ### Proxy Configuration
 
-The library supports proxy configuration using the Proxy and ProxyFile classes:
+The library supports proxy configuration using the Proxy class:
 
 ```python
 from telegram import Telegram, Proxy
