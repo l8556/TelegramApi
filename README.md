@@ -5,8 +5,7 @@ for interacting with the Telegram Bot API.
 It simplifies sending messages, documents, and media groups,
 as well as handling proxy configurations and authentication.
 
-
-# Usage
+## Usage
 
 Before using the utilities,
 initialize the `Telegram` class with your bot's authentication information.
@@ -33,7 +32,8 @@ document_paths = ['path/to/photo1.jpg', 'path/to/photo2.jpg']
 telegram.send_media_group(document_paths, caption="Check out these photos!", media_type='photo')
 ```
 
-## Proxy Configuration
+### Proxy Configuration
+
 The library supports proxy configuration using the Proxy and ProxyFile classes:
 
 ```python
