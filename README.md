@@ -39,10 +39,10 @@ The library supports proxy configuration using the Proxy and ProxyFile classes:
 ```python
 from telegram import Telegram, Proxy
 
+# Initialize a Proxy instance
 proxy = Proxy(login='your_login', password='your_password', ip='proxy_ip', port='proxy_port')
 
 # Initialize Telegram via proxy
-
 telegram = Telegram(token='YOUR_BOT_TOKEN', chat_id='YOUR_CHAT_ID', proxy=proxy)
 ```
 
