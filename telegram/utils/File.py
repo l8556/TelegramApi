@@ -52,6 +52,14 @@ class File:
 
     @staticmethod
     def delete(path: "str | tuple | list", stdout: bool = False, stderr: bool = False) -> None:
+        """
+        Deletes the specified file or directory. Supports single or multiple paths.
+
+        :param path: Path(s) to the file(s) or directory(ies) to delete. Can be a string, tuple, or list.
+        :param stdout: If True, prints a message to standard output upon successful deletion. Default is False.
+        :param stderr: If True, prints an error message to standard error if the path is invalid or the deletion fails. Default is False.
+        :return: None
+        """
         if not path:
             return print(f"[red]|DELETE ERROR| Path should be string, tuple or list not {path}") if stderr else None
 
@@ -73,14 +81,34 @@ class File:
 
     @staticmethod
     def get_paths(dir_path: str) -> list:
+        """
+        Retrieves all file paths within the specified directory.
+
+        :param dir_path: Path to the directory.
+        :return: A list of paths to all files within the directory.
+        """
         return [os.path.join(root, filename) for root, _, files in os.walk(dir_path) for filename in files]
 
     @staticmethod
     def read_json(path_to_json: str, encoding: str = "utf_8_sig") -> json:
+        """
+        Reads a JSON file and returns its contents.
+
+        :param path_to_json: Path to the JSON file.
+        :param encoding: The encoding of the file. Default is "utf_8_sig".
+        :return: The contents of the JSON file.
+        """
         with codecs_open(path_to_json, mode="r", encoding=encoding) as file:
             return json.load(file)
 
     @staticmethod
     def read(file_path: str, encoding='utf-8') -> str:
+        """
+        Reads a text file and returns its contents as a string.
+
+        :param file_path: Path to the text file.
+        :param encoding: The encoding of the file. Default is 'utf-8'.
+        :return: The contents of the file.
+        """
         with io_open(file_path, 'r', encoding=encoding) as file:
             return file.read()
